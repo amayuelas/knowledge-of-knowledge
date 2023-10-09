@@ -20,9 +20,11 @@ You will need to install
 
 ## Data
 
-Data will be uploaded to this GDrive [folder](https://drive.google.com/drive/folders/1A_RzxAUSn7tOMrxcB4ocW86rc1r6TgfK?usp=sharing) (retricted to UCSB accounts).
+Data will be uploaded to this GDrive [folder](https://drive.google.com/drive/folders/1A_RzxAUSn7tOMrxcB4ocW86rc1r6TgfK?usp=sharing) (retricted to UCSB accounts). 
 
 Data is generated through `format_datasets.py`. This file generates a dataset with lines of texts Question+Answer. It takes 2 arguments `--datasets`: list of datasets pointed in paths, `--output_dir`: output dir with the generated dataset for finetuning.
+
+Prefix 'kok-' refers to the datasets generated with this scripts and ready to used for finetuning.
 
 
 ## Training
