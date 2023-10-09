@@ -28,7 +28,7 @@ Prefix 'kok-' refers to the datasets generated with this scripts and ready to us
 
 Datasets include so far: 
 
-- `kok-false-premises`: [FalseQA](https://aclanthology.org/2023.acl-long.309/), [$QA^2$](https://aclanthology.org/2023.acl-long.472/)
+- `kok-false-premises`: [FalseQA](https://aclanthology.org/2023.acl-long.309/), [QA^2](https://aclanthology.org/2023.acl-long.472/)
 - `kok-controversial`: [ControversialQA](https://arxiv.org/abs/2302.05061)
 - `kok-ambiguous`: [AmbigQA](https://arxiv.org/abs/2004.10645) 
 
