@@ -159,7 +159,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-
+llama_finetune/__pycache__
+llama_finetune/wandb
 
 # Data
 data/
+checkpoints/
+output/
+wandb/
