@@ -28,12 +28,12 @@ def format_qaqa(dataset_paths):
             question = df.iloc[i]["question"]
             answer = df.iloc[i]["abstractive_answer"]
             text = "### Question: " + question +  "\n### Answer: " + answer
-            line = {"question": question, "answer": answer, "text": text, "source": "QAQA", "label": 0}
+            line = {"question": question, "answer": [answer], "text": text, "source": "QAQA", "label": 0}
         else:
             question = df.iloc[i]["question"]
             answer = df.iloc[i]["abstractive_answer"]
             text = "### Question: " + question +  "\n### Answer: Question has a questionable assumption because " + answer[0].lower() + answer[1:]
-            line = {"question": question, "answer": answer, "text": text, "source": "QAQA", "label": 1}
+            line = {"question": question, "answer": [answer], "text": text, "source": "QAQA", "label": 1}
 
         texts.append(line)
 
@@ -52,7 +52,7 @@ def format_FalseQA(dataset_paths):
             question = df.iloc[i]["question"]
             answer = df.iloc[i]["answer"]
             text = "### Question: " + question +  "\n### Answer: " + answer
-            line = {"question": question, "answer": answer, "text": text, "source": "FalseQA", "label": 0}
+            line = {"question": question, "answer": [answer], "text": text, "source": "FalseQA", "label": 0}
         else:
             question = df.iloc[i]["question"]
 
@@ -64,7 +64,7 @@ def format_FalseQA(dataset_paths):
                 answer = answers
             
             text = "### Question: " + df.iloc[i]["question"] +  "\n### Answer: Question has a false assumption because " + answer[0].lower() + answer[1:]
-            line = {"question": question, "answer": answer, "text": text, "source": "FalseQA", "label": 1}
+            line = {"question": question, "answer": [answer], "text": text, "source": "FalseQA", "label": 1}
         texts.append(line)
     
     return texts
@@ -129,7 +129,7 @@ def format_cqa(dataset_paths):
         answer2 = row[2]
 
         text = "### Question: " + question + "\n### Answer: Question is controversial. One could say " + answer2
-        line = {"question": question, "answer": answer2, "text": text, "source": "cqa", "label": 1}
+        line = {"question": question, "answer": [answer2], "text": text, "source": "cqa", "label": 1}
         texts.append(line)
 
     # Retrieve the same number of queries from Natual Questions dataset
@@ -151,7 +151,7 @@ def format_cqa(dataset_paths):
             continue
 
         text = "### Question: " + question + "\n### Answer: " + answer
-        line = {"question": question, "answer": answer, "text": text, "source": "cqa", "label": 0}
+        line = {"question": question, "answer": [answer], "text": text, "source": "cqa", "label": 0}
         texts.append(line)
 
     # Sufffle the dataset
@@ -177,11 +177,34 @@ def merge_datasets(datasets, paths, output_dir):
     if "cqa" in datasets:
         cqa = format_cqa(paths["cqa"])
         text.extend(cqa)
+    if "kok-all" in datasets: 
+        # merge all datasets with the same number of examples per datasetx
+        # TODO: do this in a more elegant way
+        qaqa = format_qaqa(paths["qaqa"])
+        falseQA = format_FalseQA(paths["FalseQA"])
+        kok_false_premise = qaqa + falseQA
+        random.shuffle(kok_false_premise)
+
+        kok_ambiguous = format_AmbigQA(paths["AmbigQA"])
+        kok_cqa = format_cqa(paths["cqa"])
+
+        all_datasets = [kok_false_premise, kok_ambiguous, kok_cqa]
+        min_length = min([len(dataset) for dataset in all_datasets])
+        kok_false_premise = kok_false_premise[:min_length]
+        kok_ambiguous = kok_ambiguous[:min_length]
+        kok_cqa = kok_cqa[:min_length]
+        text.extend(kok_false_premise)
+        text.extend(kok_ambiguous)
+        text.extend(kok_cqa)
     
 
-    print("Length: ", len(text))
     train_data, test_data = train_test_split(text, test_size=0.2, random_state=42)
 
+    # Reduce train_data, test_data to 20%
+    train_data = train_data[:int(len(train_data)*0.2)]
+    test_data = test_data[:int(len(test_data)*0.2)]
+    print("Train data size: ", len(train_data))
+    print("Test data size: ", len(test_data))
 
     # Save the data
     if not os.path.exists(output_dir):
@@ -200,8 +223,8 @@ if __name__ == '__main__':
 
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output-dir", type=str, help="the output directory", default="data/controversial/")
-    parser.add_argument("--datasets", nargs="+", help="list of datsets selected", choices=list(paths.keys()), default=["cqa"])
+    parser.add_argument("--output-dir", type=str, help="the output directory", default="data/kok-controversial/")
+    parser.add_argument("--datasets", nargs="+", help="list of datsets selected", choices=list(paths.keys()) + ["kok-all"], default=["cqa"])
     args = parser.parse_args()
     print("Arguments: ", args)
     merge_datasets(args.datasets, paths, args.output_dir)

@@ -21,8 +21,10 @@ fine_tuned_list = [
 ]
 
 dataset_dir = {
-    "false_premises": "data/false_premises/dev.jsonl",
-    "ambiguous": "data/ambiguous/dev.jsonl",
+    "kok-false-premises": "data/false_premises/dev.jsonl",
+    "kok-ambiguous": "data/ambiguous/dev.jsonl",
+    "kok-controversial": "data/kok-controversial/dev.jsonl",
+    "kok-all": "data/kok-all/dev.jsonl",
 }
 
 
