@@ -25,6 +25,9 @@ dataset_dir = {
     "kok-ambiguous": "data/ambiguous/dev.jsonl",
     "kok-controversial": "data/kok-controversial/dev.jsonl",
     "kok-all": "data/kok-all/dev.jsonl",
+    "SelfAware": "data/SelfAware/SelfAware.jsonl",
+    "kok-kok": "data/kok-kok/dev.jsonl",
+    "kok-kvsu": "data/kok-kvsu/dev.jsonl"
 }
 
 

@@ -8,24 +8,43 @@ from sklearn import metrics
 
 templates = {
     "kok-false_premise": [
-        "Question has a questionable assumption because",
-        "Question has a false assumption because"
+        "Question has a questionable assumption",
+        "Question has a false assumption"
     ],
 
     "kok-ambiguous": [
-        "Question is ambiguous because"
+        "Question is ambiguous"
     ],
 
     "kok-controversial": [
         "Question is controversial"
-    ]    
+    ],
+    "kok-kok":[
+        "Question is future unknown", 
+        "Question is unsolved problem",
+        "Question is controversial",
+        "Questions is question with false assumption",
+        "Question is counterfactual question",
+        "Question is ambiguous"
+    ],
+    "kok-kvsu": [
+        "Question may be unknown"
+    ],
+    "any": [
+        "Question has a questionable assumption",
+        "Question has a false assumption",
+        "Question is ambiguous",
+        "Question is controversial"
+    ],
 }
 
 
 dataset_dict = {
     "kok-false_premise": ['QAQA', 'FalseQA'],
     "kok-ambiguous": ['AmbigQA'],
-    "kok-controversial": ['cqa']
+    "kok-controversial": ['cqa'],
+    "kok-kok": ["kok"],
+    "kok-kvsu": ["kok"]
 }
 
 
@@ -33,6 +52,11 @@ def evaluate(args):
     print(f"Filename: {args.input_file}")
     dataset = load_dataset('json', data_files=args.input_file, split='train', download_mode='force_redownload')
 
+
+    if args.dataset == "any":
+        # no filtering
+        run_evaluate(dataset, args.dataset)
+        return
     if args.dataset == 'kok-all':
         selected_datasets = list(dataset_dict.keys())
         print("selected_datasets: ", selected_datasets)
@@ -52,12 +76,15 @@ def evaluate(args):
 
 
 
-def template_check(generated_answer, dataset):
-    
+def template_check(generated_answer, dataset, question):
+        
+
         for template in templates[dataset]:
             if template.lower() in generated_answer.lower():
                 return True
         return False
+
+        
 
 
 
@@ -71,21 +98,21 @@ def run_evaluate(dataset, dataset_name):
     for question in tqdm(dataset):
 
         generated_answer = question['generated_text']
-        if type(question['answer']) == list:
-            rouge = [scorer.score(answer, generated_answer) for answer in question['answer']]
-            rouge = max([r['rougeL'].recall for r in rouge])
-            rouge_scores.append(rouge)
-        else:
-            rouge = scorer.score(question['answer'], generated_answer)['rougeL'].recall
-            rouge_scores.append(rouge)
+        if question['answer'] != None:
+            if type(question['answer']) == list:
+                rouge = [scorer.score(answer, generated_answer) for answer in question['answer']]
+                rouge = max([r['rougeL'].recall for r in rouge])
+                rouge_scores.append(rouge)
+            else:
+                rouge = scorer.score(question['answer'], generated_answer)['rougeL'].recall
+                rouge_scores.append(rouge)
 
-        template_res = template_check(generated_answer, dataset_name)
+        template_res = template_check(generated_answer, dataset_name, question)
         template_list.append(template_res)
         if question['label'] == 1:
             rouge_scores_positive.append(rouge)
 
     conf_matrix = metrics.confusion_matrix(dataset['label'], template_list)
-    print(conf_matrix)
     # Extract TP, FP, FN, and TN from the confusion matrix
     if conf_matrix.shape == (1,1):
         TP, FP, FN, TN = 0, 0, 0, conf_matrix[0,0]
@@ -97,15 +124,18 @@ def run_evaluate(dataset, dataset_name):
     recall = metrics.recall_score(dataset['label'], template_list) if (TP + FN) != 0 else 0
     f1 = metrics.f1_score(dataset['label'], template_list) if (precision + recall) != 0 else 0
     
+    print("rogue length: ", len(rouge_scores))
+    print("template_list length: ", len(template_list))
+          
     rouge_avg, rouge_std = np.mean(rouge_scores), np.std(rouge_scores)
     print(f"Dataset name: {dataset_name}")
     print(f"TP: {TP}, FP: {FP}, FN: {FN}, TN: {TN}")
-    print(f"Accuracy: {accuracy}")
-    print(f"Precision: {precision}")
-    print(f"Recall: {recall}")
-    print(f"F1: {f1}")
-    print(f"Rouge: {rouge_avg} +- ({rouge_std})")
-    print(f"Rouge Positive: {np.mean(rouge_scores_positive)} +- ({np.std(rouge_scores_positive)})")
+    print(f"Accuracy: {accuracy:.2f}")
+    print(f"Precision: {precision:.2f}")
+    print(f"Recall: {recall:.2f}")
+    print(f"F1: {f1:.2f}")
+    print(f"Rouge: {rouge_avg:.2f} +- ({rouge_std:.2f})")
+    print(f"Rouge Positive: {np.mean(rouge_scores_positive):.2f} +- ({np.std(rouge_scores_positive):.2f})")
             
 
 

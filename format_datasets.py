@@ -5,7 +5,7 @@ import json
 import random
 import argparse
 import pandas as pd
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from sklearn.model_selection import train_test_split
 
 paths = {
@@ -13,6 +13,7 @@ paths = {
         "FalseQA": ["data/FalseQA/train.csv", "data/FalseQA/test.csv", "data/FalseQA/valid.csv"],
         "AmbigQA": ["data/AmbigQA/train.json", "data/AmbigQA/dev.json"],
         "cqa": ["data/cqa/comments_top1_AskReddit_train.tsv", "data/cqa/comments_top1_AskReddit_dev.tsv", "data/cqa/comments_top1_AskReddit_test.tsv"],
+        "knowledge-of-knowledge": ["data/knowledge-of-knowledge/trial.jsonl"]
     }
 
 
@@ -160,6 +161,33 @@ def format_cqa(dataset_paths):
     return texts
 
 
+def format_knowledge_of_knowledge(dataset_paths):
+
+    data = load_dataset('json', data_files=dataset_paths, split='train')
+
+    texts = []
+    for row in data:
+        question = row['question']
+        category = row['category']
+        answer = row['answer']
+        source = row['source']
+        label = row['unknown']
+
+        if answer == None:
+            continue
+
+        if label: #unknown
+            if len(answer) != 1:
+                answer2write = max(answer, key=len)
+            text = "### Question: " + question + f"\n### Answer: Question is {category} because " + answer2write[0].lower() + answer2write[1:]
+            # text = "### Question: " + question + f"\n### Answer: Question may be unknown because " + answer2write[0].lower() + answer2write[1:]
+        else:
+            text = "### Question: " + question + f"\n### Answer: " + answer[0]
+            
+        line = {"question": question, "answer": answer, "text": text, "source": source, "label": label, "category": category}
+        texts.append(line)
+
+    return texts
 
 
 def merge_datasets(datasets, paths, output_dir):
@@ -177,6 +205,9 @@ def merge_datasets(datasets, paths, output_dir):
     if "cqa" in datasets:
         cqa = format_cqa(paths["cqa"])
         text.extend(cqa)
+    if "knowledge-of-knowledge" in datasets:
+        kok = format_knowledge_of_knowledge(paths["knowledge-of-knowledge"])
+        text.extend(kok)
     if "kok-all" in datasets: 
         # merge all datasets with the same number of examples per datasetx
         # TODO: do this in a more elegant way
