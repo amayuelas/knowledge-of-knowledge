@@ -64,6 +64,7 @@ def main(args):
     # Load the Unknowns dataset
     unknown_data = load_dataset('json', data_files=args.unknowns_file, split='train')
     unknown_data = unknown_data.filter(lambda x: x['source'] == 'turk')
+    
     tmp = []
     for d in unknown_data:
         rationale = d['rationale']
@@ -97,7 +98,7 @@ def main(args):
     for r in results:
         question = None
         if len(r) != 0:
-            question = r[0]
+            question = r[0][0]
         
         if question in results_questions or question == None:
             print("Repeated question: ", question)
@@ -108,8 +109,7 @@ def main(args):
                 if question in results_questions:
                     question = None
         results_questions.append(question)
-    results_questions = [q[0] for q in results_questions]
-    print("# unfound/repeated questions: ", cnt)
+    results_questions = [q for q in results_questions]
 
     ## Extract original items
     known_questions = []
@@ -117,9 +117,12 @@ def main(args):
     for d in tqdm(known_dataset):
         if d['question'] in results_questions:
             known_questions.append(d)
+    print("length of known_questions: ", len(known_questions))
 
-    
-    with open(Path(args.output_dir, "trial.jsonl"), "w") as f:
+    # Save the dataset
+    print("#Unknown questions: ", len(unknown_dataset))
+    print("#Known questions: ", len(known_questions))
+    with open(Path(args.output_file), "w") as f:
         for d in unknown_dataset:
             f.write(json.dumps(d) + "\n")
         for d in known_questions:
@@ -132,7 +135,7 @@ if __name__ =="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--unknowns-file", type=str, help="the dataset to use", default="data/knowledge-of-knowledge/unknowns_all.jsonl")
     parser.add_argument("--knowns-datasets", nargs="+", help="list of datsets selected", choices=list(datasets_dict.keys()), default=["hotpotqa", "triviaqa", "squad"])
-    parser.add_argument("--output-dir", type=str, help="the output directory", default="data/knowledge-of-knowledge")
+    parser.add_argument("--output-file", type=str, help="the output directory", default="data/knowledge-of-knowledge/knowns_unknowns.jsonl")
     parser.add_argument("--sim-threshold", type=float, help="the similarity threshold", default=0.5)
     args = parser.parse_args()
     main(args)
