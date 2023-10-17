@@ -1,3 +1,4 @@
+import re
 import numpy as np
 import argparse
 from tqdm import tqdm
@@ -5,6 +6,7 @@ from datasets import load_dataset
 from rouge_score import rouge_scorer
 import pandas as pd
 from sklearn import metrics
+from simcse import SimCSE
 
 uncertain_list = [
     "The answer is unknown.",
@@ -94,19 +96,58 @@ def evaluate(args):
         run_evaluate(select_dataset, selected_dataset)
 
 
+def cut_sentences(content):
+    sentences = re.split(r"(\.|\!|\?|。|！|？|\.{6})", content)
+    return sentences
 
-def template_check(generated_answer, dataset):
+
+def cut_sub_string(input_string, window_size=5, punctuation=".,?!"):
+    input_string = input_string.strip().lower()
+    if len(input_string) < 2:
+        return [""]
+    if input_string[-1] in punctuation:
+        input_string = input_string[:-1]
+    string_list = input_string.split()
+    length = len(string_list)
+    if length <= window_size:
+        return [input_string]
+    else:
+        res = []
+        for i in range(length - window_size + 1):
+            sub_string = " ".join(string_list[i : i + window_size])
+            if sub_string != "" or sub_string != " ":
+                res.append(sub_string)
+        return res
+
+
+def template_check(generated_answer, dataset, model):
         
         for template in templates[dataset]:
             if template.lower() in generated_answer.lower():
                 return True
+        
+        sub_sentences = cut_sentences(generated_answer)
+        sub_str = []
+        for sub_sentence in sub_sentences:
+            if len(sub_sentence) >= 2:
+                sub_str += cut_sub_string(sub_sentence)
+        if len(sub_str) != 0:
+            similarities = model.similarity(sub_str, uncertain_list)
+        else:
+            similarities = [0]
+        max_uncertainty = np.max(similarities)
+        if max_uncertainty > args.sim_threshold:
+            print("max_uncertainty: ", max_uncertainty)
+            print("generated_answer: ", generated_answer)
+            return True
+
         return False
 
         
 def answer_check(generated_answer, answers):
 
     for answer in answers:
-        if answer.lower() in generated_answer.lower():
+        if answer.strip().lower() in generated_answer.lower():
             return True
     return False
 
@@ -114,6 +155,8 @@ def answer_check(generated_answer, answers):
     
 def run_evaluate(dataset, dataset_name):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+    model = SimCSE(args.model)
+
 
     template_list = []
     answer_correct_list = []
@@ -131,7 +174,7 @@ def run_evaluate(dataset, dataset_name):
                 rouge = scorer.score(question['answer'], generated_answer)['rougeL'].recall
                 rouge_scores.append(rouge)
 
-        template_res = template_check(generated_answer, dataset_name)
+        template_res = template_check(generated_answer, dataset_name, model)
         template_list.append(template_res)
         if question['label'] == 1:
             rouge_scores_positive.append(rouge)
@@ -174,5 +217,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-file", type=str, help="the input file path", required=True)
     parser.add_argument("--dataset", type=str, help="the dataset name", choices=list(templates.keys())+['kok-all'],  required=True)
+    parser.add_argument("--sim_threshold", type=float, help="the similarity threshold", default=0.7)
+    parser.add_argument("--model", default="princeton-nlp/sup-simcse-roberta-large", type=str, help="Smilarity Model")
     args = parser.parse_args()
     evaluate(args)
