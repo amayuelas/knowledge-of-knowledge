@@ -13,7 +13,7 @@ paths = {
         "FalseQA": ["data/FalseQA/train.csv", "data/FalseQA/test.csv", "data/FalseQA/valid.csv"],
         "AmbigQA": ["data/AmbigQA/train.json", "data/AmbigQA/dev.json"],
         "cqa": ["data/cqa/comments_top1_AskReddit_train.tsv", "data/cqa/comments_top1_AskReddit_dev.tsv", "data/cqa/comments_top1_AskReddit_test.tsv"],
-        "knowledge-of-knowledge": ["data/knowledge-of-knowledge/trial.jsonl"]
+        "knowledge-of-knowledge": ["data/knowledge-of-knowledge/knowns_unknowns.jsonl"]
     }
 
 
@@ -231,9 +231,9 @@ def merge_datasets(datasets, paths, output_dir):
 
     train_data, test_data = train_test_split(text, test_size=0.2, random_state=42)
 
-    # Reduce train_data, test_data to 20%
-    train_data = train_data[:int(len(train_data)*0.2)]
-    test_data = test_data[:int(len(test_data)*0.2)]
+    # Reduce train_data, test_data to some percetange
+    train_data = train_data[:int(len(train_data)*args.selection_percentage)]
+    test_data = test_data[:int(len(test_data)*args.selection_percentage)]
     print("Train data size: ", len(train_data))
     print("Test data size: ", len(test_data))
 
@@ -256,6 +256,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=str, help="the output directory", default="data/kok-controversial/")
     parser.add_argument("--datasets", nargs="+", help="list of datsets selected", choices=list(paths.keys()) + ["kok-all"], default=["cqa"])
+    parser.add_argument("--selection-percentage", type=float, help="percentage of the dataset to use", default=1.0)
     args = parser.parse_args()
     print("Arguments: ", args)
     merge_datasets(args.datasets, paths, args.output_dir)
