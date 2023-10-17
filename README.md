@@ -7,6 +7,7 @@ You will need to install
  - pytorch
  - tranformers
  - datasets
+ - accelerate
  - tqdm
  - pandas
  - scikit-learn
