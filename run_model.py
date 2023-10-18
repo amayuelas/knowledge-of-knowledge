@@ -12,6 +12,7 @@ llama_dict = {
     "llama-2-7b-chat": "meta-llama/Llama-2-7b-chat-hf",
     "llama-2-13b": "meta-llama/Llama-2-13b-hf",
     "llama-2-13b-chat": "meta-llama/Llama-2-13b-chat-hf",
+    "llama-2-70b-chat": "meta-llama/Llama-2-70b-chat-hf",
 }
 llama_list = list(llama_dict.keys())
 
@@ -30,6 +31,29 @@ dataset_dir = {
     "kok-kvsu": "data/kok-kvsu/dev.jsonl"
 }
 
+prompt_styles = {
+    "direct": "### Question: {question}\n### Answer: ",
+    "instruct": """Read the following question carefully and answer it. Think before answering. If the question is unknown or highly uncertain, you may answer: 'It is unknown'.
+### Question: {question}
+### Answer: """,
+    "incontext": """### Question: Where is the Comte cheese made?
+### Answer: Compte cheese is made in the Franche-Comté region of eastern France.
+### Question: What is the happiest moment in life ?
+### Answer: The answer is uncertain because everyone has different experiences and differnet happiest moment in life.
+### Question: Who is the main character in Taxi Driver?
+### Answer: The main character in Taxi Driver is Travis Bickle.
+### Question: Who will be the winner of the next World Cup?
+### Answer: It is impossible to answer, I cannot predict the future with certainty.
+### Question: When did the Pearl Harbor attack happen? 
+### Answer: The Pearl Harbor attack happened on December 7, 1941.
+### Question: What is the closest planet hosting extraterrestrial life?
+### Answer: It is currently unknown if extraterristial life exists as understood to humans, let alone the closest planet hosting it.
+### Question: What is the capital of the United States?
+### Answer: The capital of the United States is Washington, D.C.
+### Question: {question}
+### Answer:
+    """,
+}
 
 def load_llama_model(args):
 
@@ -80,7 +104,7 @@ def generate_answer(args):
     i=0
     for question in tqdm(dataset): 
 
-        input_str = "### Question: " + question['question'] + "\n### Answer: "
+        input_str = prompt_styles[args.prompt_style].format(question=question["question"])
         if args.model_name in fine_tuned_list:
             inputs = [input_str]
             generated_text = model.generate(inputs)[0]
@@ -95,7 +119,9 @@ def generate_answer(args):
 
         question["generated_text"] = generated_text
 
-        out_filename = Path(f"{args.model_name}-T_{args.temperature}.jsonl")
+        out_filename = Path(f"{args.model_name}-{args.prompt_style}-T_{args.temperature}.jsonl")
+        if args.n_train_pairs:
+            out_filename = Path(f"{args.model_name}-{args.prompt_style}-N_{args.n_train_pairs}-T_{args.temperature}.jsonl")
         with open(output_dir / out_filename, "a+") as f:
             f.write(json.dumps(question) + "\n")
 
@@ -112,6 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str, help="the dataset path where the json is stored", default="false_premises", choices=dataset_dir.keys())
     parser.add_argument("--output_dir", type=str, help="the output directory to save the model", default="output")
     parser.add_argument("--model_name", type=str, help="the model name", choices=fine_tuned_list+llama_list, default="fine-tuned-llama-2-7b")
+    parser.add_argument("--n_train_pairs", type=int, default=None, help="Number of training pairs")
 
     # Lora infernece args
     # model arguments
@@ -128,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=1.0, help="Nucleus filtering (top-p) before sampling (<=0.0: no filtering)")
     parser.add_argument("--num_return_sequences", type=int, default=1, help="The number of samples to generate")
     parser.add_argument("--max_new_tokens", type=int, default=128, help="The maximum number of tokens to generate")
-
+    parser.add_argument("--prompt_style", type=str, choices=list(prompt_styles.keys()), default="direct", help="The prompt style to use")
     args = parser.parse_args()
 
     generate_answer(args)

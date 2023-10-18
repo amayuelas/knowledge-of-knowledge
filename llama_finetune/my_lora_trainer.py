@@ -18,6 +18,8 @@ def parse_args():
     parser.add_argument("--dataset_path", type=str, help="the dataset path where the json is stored")
     parser.add_argument("--dataset_text_field", type=str, default="text", help="the text field of the dataset")
     parser.add_argument("--seq_length", type=int, default=512, help="Input sequence length")
+    parser.add_argument("--n_train_pairs", type=int, default=None, help="Number of training pairs")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
     # model arguments
     parser.add_argument("--model_name", type=str, help="the model name")
     parser.add_argument("--cache_dir", type=str, default=None, help="The cache directory to save the model")
@@ -63,21 +65,11 @@ class LoraTrainer:
         eval_file = os.path.join(self.dataset_path, 'dev.jsonl')
         self.train_dataset = load_dataset('json', data_files=train_file, split='train', download_mode='force_redownload')  
         self.dev_dataset = load_dataset('json', data_files=eval_file, split='train', download_mode='force_redownload')
-
-    # def formatting_prompts_func(self, example):
-    #     output_texts = []
-    #     print('#'* 12)
-    #     print(example)
-    #     print('#'* 12)
-    
-    #     for i in range(len(example['instruction'])):
-    #         text = f"### Question: {example['instruction'][i]}\n ### Answer: {example['output'][i]}"
-    #         output_texts.append(text)
-
-    #     print(output_texts[0])
-
-    #     return
-    #     return output_texts
+        self.output_dir = os.path.join(self.args.output_dir, f"{self.model_name}")
+        if self.args.n_train_pairs:
+            self.train_dataset = self.train_dataset.shuffle(seed=args.seed).select(range(self.args.n_train_pairs))
+            self.output_dir = os.path.join(self.args.output_dir, f"{self.model_name}-N_{self.args.n_train_pairs}")
+            print("#Train pairs: ", self.args.n_train_pairs)
 
 
     def load_model(self):
@@ -110,7 +102,7 @@ class LoraTrainer:
     def train(self):
         # Step 1: Define the training arguments
         training_args = TrainingArguments(
-            output_dir=self.args.output_dir,
+            output_dir=self.output_dir,
             per_device_train_batch_size=self.args.batch_size,
             gradient_accumulation_steps=self.args.gradient_accumulation_steps,
             learning_rate=self.args.learning_rate,
@@ -150,7 +142,7 @@ class LoraTrainer:
         trainer.train()
 
         # Step 4: Save the model
-        trainer.save_model(self.args.output_dir)
+        trainer.save_model(self.output_dir)
 
 if __name__ == '__main__':
     args = parse_args()

@@ -137,8 +137,6 @@ def template_check(generated_answer, dataset, model):
             similarities = [0]
         max_uncertainty = np.max(similarities)
         if max_uncertainty > args.sim_threshold:
-            print("max_uncertainty: ", max_uncertainty)
-            print("generated_answer: ", generated_answer)
             return True
 
         return False
@@ -217,7 +215,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-file", type=str, help="the input file path", required=True)
     parser.add_argument("--dataset", type=str, help="the dataset name", choices=list(templates.keys())+['kok-all'],  required=True)
-    parser.add_argument("--sim_threshold", type=float, help="the similarity threshold", default=0.7)
+    parser.add_argument("--sim_threshold", type=float, help="the similarity threshold", default=0.75)
     parser.add_argument("--model", default="princeton-nlp/sup-simcse-roberta-large", type=str, help="Smilarity Model")
     args = parser.parse_args()
     evaluate(args)
