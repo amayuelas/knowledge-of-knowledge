@@ -16,6 +16,7 @@ You will need to install
  - peft
  - wandb
  - trl
+ - backoff
 
 (some more packages might be missing but these are the main ones)
 
