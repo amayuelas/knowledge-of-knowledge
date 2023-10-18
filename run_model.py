@@ -6,6 +6,8 @@ import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer, GenerationConfig
 from llama_finetune.lora_inference import LoRA_Inference
+import openai
+import backoff
 
 llama_dict = {
     "llama-2-7b": "meta-llama/Llama-2-7b-hf",
@@ -20,6 +22,12 @@ fine_tuned_list = [
     "fine-tuned-llama-2-7b",
     "fine-tuned-llama-2-13b"
 ]
+
+openai_dict = {
+    "gpt-3.5": "gpt-3.5-turbo-0613",
+    "gpt-4": "gpt-4-0613"
+}
+openai_list = list(openai_dict.keys())
 
 dataset_dir = {
     "kok-false-premises": "data/false_premises/dev.jsonl",
@@ -82,6 +90,23 @@ def load_llama_model(args):
     return model 
 
 
+@backoff.on_exception(backoff.expo, openai.errors.OpenAIError, max_time=60)
+def query_chat_openai(prompt, model_name, temperature, top_p, max_new_tokens):
+
+    completion = openai.ChatCompletion.create(
+    model=openai_dict[model_name],
+    messages=[
+        {"role": "system", "content": "You are a question answering system"},
+        {"role": "user", "content": prompt}
+        ],
+    temperature=temperature,
+    top_p=top_p,
+    max_tokens=max_new_tokens,
+    )
+
+    return completion.choices[0].message['content'].strip()
+
+
 def generate_answer(args):
     output_dir = Path(args.output_dir, args.dataset)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -116,8 +141,19 @@ def generate_answer(args):
                 input_length = 1 if model.config.is_encoder_decoder else inputs.input_ids.shape[1]
                 generate_ids = generate_ids[:, input_length:]
             generated_text = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True)[0]
-
+        elif args.model_name in openai_list:
+            generated_text = query_chat_openai(
+                input_str, 
+                args.model_name, 
+                args.temperature,
+                args.top_p,
+                args.max_new_tokens
+            )
         question["generated_text"] = generated_text
+        print("input: ", input_str)
+        print("answer: ", generated_text)
+        print("ground truth: ", question["answer"])
+        
 
         out_filename = Path(f"{args.model_name}-{args.prompt_style}-T_{args.temperature}.jsonl")
         if args.n_train_pairs:
@@ -137,7 +173,7 @@ if __name__ == "__main__":
     ## General args
     parser.add_argument("--dataset", type=str, help="the dataset path where the json is stored", default="false_premises", choices=dataset_dir.keys())
     parser.add_argument("--output_dir", type=str, help="the output directory to save the model", default="output")
-    parser.add_argument("--model_name", type=str, help="the model name", choices=fine_tuned_list+llama_list, default="fine-tuned-llama-2-7b")
+    parser.add_argument("--model_name", type=str, help="the model name", choices=fine_tuned_list+llama_list+openai_list, default="fine-tuned-llama-2-7b")
     parser.add_argument("--n_train_pairs", type=int, default=None, help="Number of training pairs")
 
     # Lora infernece args
