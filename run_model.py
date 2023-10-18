@@ -90,7 +90,7 @@ def load_llama_model(args):
     return model 
 
 
-@backoff.on_exception(backoff.expo, openai.errors.OpenAIError, max_time=60)
+@backoff.on_exception(backoff.expo, openai.error.OpenAIError, max_time=60)
 def query_chat_openai(prompt, model_name, temperature, top_p, max_new_tokens):
 
     completion = openai.ChatCompletion.create(
@@ -150,10 +150,6 @@ def generate_answer(args):
                 args.max_new_tokens
             )
         question["generated_text"] = generated_text
-        print("input: ", input_str)
-        print("answer: ", generated_text)
-        print("ground truth: ", question["answer"])
-        
 
         out_filename = Path(f"{args.model_name}-{args.prompt_style}-T_{args.temperature}.jsonl")
         if args.n_train_pairs:
