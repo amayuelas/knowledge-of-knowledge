@@ -167,3 +167,4 @@ data/
 checkpoints/
 output/
 wandb/
+plots/
