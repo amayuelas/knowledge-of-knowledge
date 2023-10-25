@@ -179,8 +179,14 @@ def format_knowledge_of_knowledge(dataset_paths):
         if label: #unknown
             if len(answer) != 1:
                 answer2write = max(answer, key=len)
-            text = "### Question: " + question + f"\n### Answer: Question is {category} because " + answer2write[0].lower() + answer2write[1:]
+            
+            # kok-kvsu
             # text = "### Question: " + question + f"\n### Answer: Question may be unknown because " + answer2write[0].lower() + answer2write[1:]
+            # kok-kok
+            # text = "### Question: " + question + f"\n### Answer: Question is {category} because " + answer2write[0].lower() + answer2write[1:]
+            # kok-kvsu-instruction
+            text = f"Read the following question carefully and answer it. Think before answering. If the question is unknown or highly uncertain, you may answer: 'It is unknown'.\n### Question: {question}\n### Answer: "
+
         else:
             text = "### Question: " + question + f"\n### Answer: " + answer[0]
             

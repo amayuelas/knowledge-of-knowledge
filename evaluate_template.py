@@ -51,6 +51,10 @@ templates = {
     "kok-kvsu": [
         "Question may be unknown"
     ] + uncertain_list,
+    "selfaware": [
+        "Question may be unknown"
+    ] + uncertain_list,
+
     "any": [
         "Question has a questionable assumption",
         "Question has a false assumption",
@@ -65,7 +69,8 @@ dataset_dict = {
     "kok-ambiguous": ['AmbigQA'],
     "kok-controversial": ['cqa'],
     "kok-kok": ['hotpotqa', 'squad', 'triviaqa', 'turk'],
-    "kok-kvsu": ['hotpotqa', 'squad', 'triviaqa', 'turk']
+    "kok-kvsu": ['hotpotqa', 'squad', 'triviaqa', 'turk'],
+    "selfaware": ['SelfAware', 'hotpot_dev', 'hotpot_train', 'squadqa_dev', 'squadqa_train', 'triviaqa_dev','triviaqa_train'],
 }
 
 

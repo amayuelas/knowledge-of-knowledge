@@ -14,13 +14,17 @@ llama_dict = {
     "llama-2-7b-chat": "meta-llama/Llama-2-7b-chat-hf",
     "llama-2-13b": "meta-llama/Llama-2-13b-hf",
     "llama-2-13b-chat": "meta-llama/Llama-2-13b-chat-hf",
+    "llama-2-70b": "meta-llama/Llama-2-70b-hf",
     "llama-2-70b-chat": "meta-llama/Llama-2-70b-chat-hf",
+    "mistral-7b": "mistralai/Mistral-7B-v0.1",
+    "mistral-7b-instruct": "mistralai/Mistral-7B-Instruct-v0.1"
 }
 llama_list = list(llama_dict.keys())
 
 fine_tuned_list = [
     "fine-tuned-llama-2-7b",
-    "fine-tuned-llama-2-13b"
+    "fine-tuned-llama-2-13b",
+    "fine-tuned-llama-2-7b-chat"
 ]
 
 openai_dict = {
@@ -36,7 +40,8 @@ dataset_dir = {
     "kok-all": "data/kok-all/dev.jsonl",
     "SelfAware": "data/SelfAware/SelfAware.jsonl",
     "kok-kok": "data/kok-kok/dev.jsonl",
-    "kok-kvsu": "data/kok-kvsu/dev.jsonl"
+    "kok-kvsu": "data/kok-kvsu/dev.jsonl",
+    "kok-kvsu-instruction": "data/kok-kvsu-instruction/dev.jsonl"
 }
 
 prompt_styles = {
