@@ -1,6 +1,6 @@
 # Knowledge of Knowledge
 
-Original [Repository for the paper Knowledge of Knowledge: Exploring Known-Unknowns Uncertainty with Large Language Models](https://arxiv.org/abs/2305.13712)
+Original Repository for the paper [Knowledge of Knowledge: Exploring Known-Unknowns Uncertainty with Large Language Models](https://arxiv.org/abs/2305.13712)
 
 ## Data
 
