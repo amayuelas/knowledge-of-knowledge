@@ -1,6 +1,25 @@
 # Knowledge of Knowledge
 
 
+
+## Data
+
+Dataset **Known-Unknown Questions (KUQ)** is available in the following folder in GDrive: [link](https://drive.google.com/drive/folders/1AJHMhHAI3cqGFN8zBMFp7bDu2QK155LN?usp=share_link)
+
+The folder contains the following files: 
+- `knowns_unknowns.jsonl`: [Main dataset file] It contains the *unknown* questions and the paired *known* questions
+- `unknowns.jsonl`: It contains the original *unknown* questions generating through crowd-sourcing
+
+We also include the split train/dev generated for finetuning in folder `KUQ-Known-vs-Unknown` and `KUQ-Known-vs-Unknown-Categories`
+
+Fields contained in the dataset (`knowns_unknowns.jsonl`): 
+
+1. `"question"`: The question
+2. `"answer"`: Knowns: Correct Answers (list), Unknowns: Source of uncertainty (list)
+3. `"unknown"`: `True/False` True if unknown
+4. `source`: Data source
+5. `category`: One of the categories defined in the paper
+
 ## Install
 
 You will need to install
@@ -18,21 +37,7 @@ You will need to install
  - trl
  - backoff
 
-(some more packages might be missing but these are the main ones)
-
-## Data
-
-Data will be uploaded to this GDrive [folder](https://drive.google.com/drive/folders/1A_RzxAUSn7tOMrxcB4ocW86rc1r6TgfK?usp=sharing) (retricted to UCSB accounts). 
-
-Data is generated through `format_datasets.py`. This file generates a dataset with lines of texts Question+Answer. It takes 2 arguments `--datasets`: list of datasets pointed in paths, `--output_dir`: output dir with the generated dataset for finetuning.
-
-Prefix 'kok-' refers to the datasets generated with this scripts and ready to used for finetuning.
-
-Datasets include so far: 
-
-- `kok-false-premises`: [FalseQA](https://aclanthology.org/2023.acl-long.309/), [QA^2](https://aclanthology.org/2023.acl-long.472/)
-- `kok-controversial`: [ControversialQA](https://arxiv.org/abs/2302.05061)
-- `kok-ambiguous`: [AmbigQA](https://arxiv.org/abs/2004.10645) 
+(some more packages might be missing but these should be the main ones)
 
 
 ## Training
@@ -59,7 +64,6 @@ Main arguments to consider:
 
 ## Evaluation
 
-(Work in progress)
 
 ### Templated-based
 
@@ -67,4 +71,17 @@ Main arguments to consider:
 
 Arguments: 
 - `--input-file`: File with answers generated from the previous step.
-- `--dataset`: Dataset name to retrieve the answers from. 
+- `--dataset`: Dataset name to retrieve the answers from.
+- `--sim_threshold`: Similarity Threshold
+
+
+## Citation
+
+```
+@article{amayuelas2023knowledge,
+  title={Knowledge of knowledge: Exploring known-unknowns uncertainty with large language models},
+  author={Amayuelas, Alfonso and Pan, Liangming and Chen, Wenhu and Wang, William},
+  journal={arXiv preprint arXiv:2305.13712},
+  year={2023}
+}
+```
