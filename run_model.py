@@ -24,7 +24,8 @@ llama_list = list(llama_dict.keys())
 fine_tuned_list = [
     "fine-tuned-llama-2-7b",
     "fine-tuned-llama-2-13b",
-    "fine-tuned-llama-2-7b-chat"
+    "fine-tuned-llama-2-7b-chat",
+    "fine-tuned-llama-2-13b-chat"
 ]
 
 openai_dict = {

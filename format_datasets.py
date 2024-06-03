@@ -185,10 +185,14 @@ def format_knowledge_of_knowledge(dataset_paths):
             # kok-kok
             # text = "### Question: " + question + f"\n### Answer: Question is {category} because " + answer2write[0].lower() + answer2write[1:]
             # kok-kvsu-instruction
-            text = f"Read the following question carefully and answer it. Think before answering. If the question is unknown or highly uncertain, you may answer: 'It is unknown'.\n### Question: {question}\n### Answer: "
+            # text = f"Read the following question carefully and answer it. Think before answering. If the question is unknown or highly uncertain, you may answer: 'It is unknown'.\n### Question: {question}\n### Answer: Question may be unknown because " + answer2write[0].lower() + answer2write[1:]
+            # Multi-Agnet
+            text = f"Answer the following question as accurately as possible: {question}. Explain your answer and uncertainty. \nAnswer: Question may be unknown because {answer2write[0].lower()}{answer2write[1:]}"
 
         else:
-            text = "### Question: " + question + f"\n### Answer: " + answer[0]
+            # text = "### Question: " + question + f"\n### Answer: " + answer[0]
+            text = f"Answer the following question as accurately as possible: {question}. Explain your answer and uncertainty. \n" + "I am certain about my answer.\nAnswer: " + answer[0]
+
             
         line = {"question": question, "answer": answer, "text": text, "source": source, "label": label, "category": category}
         texts.append(line)
@@ -196,7 +200,7 @@ def format_knowledge_of_knowledge(dataset_paths):
     return texts
 
 
-def merge_datasets(datasets, paths, output_dir):
+def merge_datasets(datasets, paths, output_dir, seed_value):
     
     text = []
     if "qaqa" in datasets:
@@ -220,6 +224,7 @@ def merge_datasets(datasets, paths, output_dir):
         qaqa = format_qaqa(paths["qaqa"])
         falseQA = format_FalseQA(paths["FalseQA"])
         kok_false_premise = qaqa + falseQA
+        random.seed(seed_value)
         random.shuffle(kok_false_premise)
 
         kok_ambiguous = format_AmbigQA(paths["AmbigQA"])
@@ -235,7 +240,7 @@ def merge_datasets(datasets, paths, output_dir):
         text.extend(kok_cqa)
     
 
-    train_data, test_data = train_test_split(text, test_size=0.2, random_state=42)
+    train_data, test_data = train_test_split(text, test_size=0.2, random_state=seed_value)
 
     # Reduce train_data, test_data to some percetange
     train_data = train_data[:int(len(train_data)*args.selection_percentage)]
@@ -263,6 +268,7 @@ if __name__ == '__main__':
     parser.add_argument("--output-dir", type=str, help="the output directory", default="data/kok-controversial/")
     parser.add_argument("--datasets", nargs="+", help="list of datsets selected", choices=list(paths.keys()) + ["kok-all"], default=["cqa"])
     parser.add_argument("--selection-percentage", type=float, help="percentage of the dataset to use", default=1.0)
+    parser.add_argument("--seed_value", type=int, help="seed", default=42)
     args = parser.parse_args()
     print("Arguments: ", args)
-    merge_datasets(args.datasets, paths, args.output_dir)
+    merge_datasets(args.datasets, paths, args.output_dir, args.seed_value)

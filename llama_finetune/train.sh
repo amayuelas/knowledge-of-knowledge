@@ -1,6 +1,6 @@
-MODEL_NAME=meta-llama/Llama-2-7b-hf
-DATASET=kok-kok
-CUDA_VISIBLE_DEVICES=6,7 python my_lora_trainer.py \
+MODEL_NAME=meta-llama/Llama-2-13b-hf
+DATASET=kok-kvsu
+CUDA_VISIBLE_DEVICES=0,1 python my_lora_trainer.py \
     --model_name $MODEL_NAME \
     --dataset_path /data5/aamayuelasfernandez/knowledge-of-knowledge/data/$DATASET \
     --seq_length 1024 \
@@ -13,4 +13,4 @@ CUDA_VISIBLE_DEVICES=6,7 python my_lora_trainer.py \
     --gradient_accumulation_steps 2 \
     --num_train_epochs 10 \
     --learning_rate 5e-5 \
-    # --n_train_pairs 256
+    --n_train_pair 1024
