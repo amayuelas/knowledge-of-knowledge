@@ -7,7 +7,7 @@ Abstract: _This paper investigates the capabilities of Large Language Models (LL
 |                **Known Knowns**                |                   **Known Unknowns**                   |
 |:----------------------------------------------:|:------------------------------------------------------:|
 |      Things we are aware of and understand     |      Things we are aware of but do not understand      |
-| e.g. _What’s the boiling temperature of water? | e.g _How many planets are there in the universe?_      |
+| e.g. _What’s the boiling temperature of water?_ | e.g _How many planets are there in the universe?_      |
 |               **Unknown Knowns**               |                  **Unknown Unknowns**                  |
 | Things we understand but are not aware of      | Things we are neither aware of nor understand          |
 | e.g. _How to tell the stomach to digest?_      | e.g _How does gravity work (before it was discovered)_ |
