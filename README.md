@@ -14,6 +14,8 @@ Abstract: _This paper investigates the capabilities of Large Language Models (LL
 
 ## Data
 
+![Dataset Generation](images/Dataset-Generation.pdf)
+
 Dataset **Known-Unknown Questions (KUQ)** is available in the following folder in GDrive: [link](https://drive.google.com/drive/folders/1AJHMhHAI3cqGFN8zBMFp7bDu2QK155LN?usp=share_link)
 
 The folder contains the following files: 
