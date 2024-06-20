@@ -14,7 +14,7 @@ Abstract: _This paper investigates the capabilities of Large Language Models (LL
 
 ## Data
 
-<p align="center">
+<p align="left">
   <img width="50%" src="images/Dataset-Generation.png" style="display: inline;" />
 </p>
 
