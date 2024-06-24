@@ -18,7 +18,7 @@ Abstract: _This paper investigates the capabilities of Large Language Models (LL
   <img width="65%" src="images/Dataset-Generation.png" style="display: inline;" />
 </p>
 
-:hugs: **HF Dataset** Dataset **Known-Unknown Questions (KUQ)** is available in HuggingFace: [link](https://huggingface.co/datasets/amayuelas/KUQ)
+:hugs: **HF Dataset**: Dataset **Known-Unknown Questions (KUQ)** is available in HuggingFace: [link](https://huggingface.co/datasets/amayuelas/KUQ)
 
 The dataset is also available in the following folder in GDrive: [link](https://drive.google.com/drive/folders/1AJHMhHAI3cqGFN8zBMFp7bDu2QK155LN?usp=share_link)
 
